@@ -1,0 +1,53 @@
+name: 매일 사이트 갱신
+
+on:
+  schedule:
+    # 평일 16:40 (한국시간) = 07:40 UTC. 장 마감 데이터가 반영된 뒤 실행
+    - cron: "40 7 * * 1-5"
+  workflow_dispatch:       # Actions 탭에서 [Run workflow] 로 수동 실행
+  push:
+    branches: [main]
+    paths: ["config.json", "glossary.json", "build.py", "*.html", "*.css", "*.js", "templates/**", "static/**"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: 사이트 생성
+        run: python build.py
+      - name: 오늘의 리포트 저장 (글이 계속 쌓이도록)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          [ -d posts ] || exit 0
+          git add posts
+          git diff --cached --quiet || (git commit -m "증시 리포트 자동 발행 $(TZ=Asia/Seoul date +%F)" && git push)
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
