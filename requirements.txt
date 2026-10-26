@@ -1,0 +1,5 @@
+finance-datareader>=0.9.90
+pandas>=2.0
+jinja2>=3.1
+requests>=2.31
+scikit-learn>=1.3

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ cfg.site_name }}{% endblock %}</title>
+<meta name="description" content="{% block desc %}{% endblock %}">
+<link rel="canonical" href="{{ site_url }}{% block path %}/{% endblock %}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ cfg.site_name }}">
+<meta property="og:title" content="{{ self.title() }}">
+<meta property="og:description" content="{{ self.desc() }}">
+<meta property="og:url" content="{{ site_url }}{{ self.path() }}">
+<meta property="og:locale" content="ko_KR">
+{% if cfg.google_site_verification %}<meta name="google-site-verification" content="{{ cfg.google_site_verification }}">{% endif %}
+{% if cfg.naver_site_verification %}<meta name="naver-site-verification" content="{{ cfg.naver_site_verification }}">{% endif %}
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+{% set preset_fonts = {
+  "paper": "family=Noto+Serif+KR:wght@600;700;900",
+  "neon": "family=Black+Han+Sans&family=JetBrains+Mono:wght@500;700",
+  "soft": "family=Jua&family=Gowun+Dodum",
+  "grid": "family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500",
+  "aurora": "family=Do+Hyeon",
+} %}
+{% if preset_fonts[dz.preset] %}<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?{{ preset_fonts[dz.preset] }}&display=swap">{% endif %}
+<link rel="stylesheet" href="{{ base }}/assets/site.css?v={{ base_date }}">
+<style>:root{--ink:{{ th.ink }};--ink-2:{{ th.ink2 }};--bg:{{ th.bg }};--accent:{{ th.accent }};--ai:{{ th.ai }};--hl:{{ th.highlight }};--up:{{ th.up }};--down:{{ th.down }}}</style>
+{% block head %}{% endblock %}
+</head>
+<body class="d-{{ dz.preset }}"{% block body_attr %}{% endblock %}>
+{% if cp.promo %}<div class="promo"><div class="wrap">{{ cp.promo | safe }}</div></div>{% endif %}
+<header class="top">
+  <div class="wrap top-in">
+    <a class="logo" href="{{ base }}/"><span class="logo-mark" aria-hidden="true"></span><span>{% if cfg.site_name.endswith('AI') %}{{ cfg.site_name[:-2] }}<span class="logo-ai">AI</span>{% else %}{{ cfg.site_name }}{% endif %}</span></a>
+    <form class="search" role="search" action="{{ base }}/" data-search>
+      <label class="sr" for="q">종목 검색</label>
+      <input id="q" type="search" placeholder="종목명 또는 코드 검색" autocomplete="off">
+      <ul class="search-list" hidden></ul>
+    </form>
+    <nav class="top-nav" aria-label="주요 메뉴">
+      {% if has_glossary %}<a class="link gl-link" href="{{ base }}/glossary/">용어사전</a>{% endif %}
+      {% if ft.ai_page %}<a class="link ai-link" href="{{ base }}/ai/">{{ cp.nav_ai }} <span class="free">무료</span></a>{% endif %}
+      {% if ft.reports %}<a class="link" href="{{ base }}/report/">증시 리포트</a>{% endif %}
+      <a class="link" href="{{ base }}/market/kospi/">코스피</a>
+      <a class="btn btn-accent btn-sm" href="#apply">무료 상담</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+{% block main %}{% endblock %}
+</main>
+
+{% include "_lead.html" %}
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="foot-logo">{% if cfg.site_name.endswith('AI') %}{{ cfg.site_name[:-2] }}<span class="logo-ai">AI</span>{% else %}{{ cfg.site_name }}{% endif %}</p>
+    <p data-biz>{{ cfg.biz_info }}</p>
+    <p>AI 주가예측은 과거 시세로 학습한 머신러닝 모델의 통계적 추정이며 미래 수익을 보장하지 않습니다. 본 사이트의 시세와 지표는 공개된 시장 데이터를 자동으로 정리한 것으로, 데이터 제공 시점과 차이가 있을 수 있습니다. 특정 종목의 매수·매도를 권유하지 않으며, 투자에 대한 최종 판단과 책임은 투자자 본인에게 있습니다. 당사는 1:1 투자자문을 제공하지 않습니다.</p>
+    <p>{% if has_glossary %}<a href="{{ base }}/glossary/">주식 용어사전</a> · {% endif %}<a href="{{ base }}/report/">증시 리포트</a> · <a href="{{ base }}/ai/">AI 주가예측 방법</a> · <a href="{{ base }}/privacy/">개인정보처리방침</a> · <a href="{{ base }}/market/kospi/">코스피 전 종목</a> · <a href="{{ base }}/market/kosdaq/">코스닥 전 종목</a></p>
+    <p>© {{ year }} {{ cfg.site_name }}</p>
+  </div>
+</footer>
+
+{% block sheet %}{% endblock %}
+
+<div class="modal" id="hook-modal" role="dialog" aria-modal="true" aria-labelledby="hook-title" hidden>
+  <div class="modal-back" data-close-modal></div>
+  <div class="modal-box">
+    <button type="button" class="sheet-close" data-close-modal aria-label="닫기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <p class="hook-tag" id="hook-tag">무료 신청</p>
+    <div class="quick">
+      <form class="quick-form" data-lead="modal" novalidate>
+        <p class="quick-title" id="hook-title">무료 신청</p>
+        <p class="quick-sub" id="hook-sub"></p>
+        <div class="quick-row">
+          <label class="sr" for="ph-modal">휴대폰 번호</label>
+          <input id="ph-modal" type="tel" name="phone" inputmode="numeric" autocomplete="tel" placeholder="010-0000-0000" maxlength="13" required>
+          <button type="submit" class="btn btn-accent">무료 신청</button>
+        </div>
+        <label class="quick-consent"><input type="checkbox" name="agree_privacy" value="Y"><span>[필수] 개인정보 수집·이용 동의 <small>(휴대폰 번호·관심 종목 / 상담 연락 목적 / 1년 보관 · <a href="{{ base }}/privacy/" target="_blank">자세히</a>)</small></span></label>
+        <label class="quick-consent"><input type="checkbox" name="agree_marketing" value="Y"><span>[선택] 시장 정보 등 광고성 문자·카카오톡 수신 동의</span></label>
+        <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+        <p class="lead-error" role="alert" hidden></p>
+      </form>
+      <p class="lead-done" role="status" hidden>접수됐습니다. 남겨주신 번호로 곧 연락드리겠습니다.</p>
+    </div>
+  </div>
+</div>
+
+<nav class="mobile-bar" aria-label="빠른 문의">
+  <a data-tel href="#apply">전화</a>
+  <a class="kakao" data-kakao href="#apply">카톡 문의</a>
+  <a class="go" href="#apply">무료 상담</a>
+</nav>
+
+<script>window.SITE = {{ public_cfg | safe }}; window.SITE.base = "{{ base }}";</script>
+<script src="{{ base }}/assets/site.js?v={{ base_date }}" defer></script>
+</body>
+</html>

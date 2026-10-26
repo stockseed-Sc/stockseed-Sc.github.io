@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ud, hook_cards with context %}
+{% block title %}{{ t.term }} 뜻 — 주식 초보를 위한 쉬운 설명 | {{ cfg.site_name }} 용어사전{% endblock %}
+{% block desc %}{{ t.term }}이란? {{ t.short }} {{ t.body[:80] }}…{% endblock %}
+{% block path %}/glossary/{{ t.slug }}/{% endblock %}
+{% block body_attr %} data-stock="용어: {{ t.term }}"{% endblock %}
+{% block head %}
+<script type="application/ld+json">{{ {"@context":"https://schema.org","@type":"DefinedTerm","name":t.term,"description":t.short ~ " " ~ t.body,"inDefinedTermSet":site_url ~ "/glossary/"} | tojson }}</script>
+<script type="application/ld+json">{{ {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":t.term ~ " 뜻이 뭔가요?","acceptedAnswer":{"@type":"Answer","text":t.short ~ " " ~ t.body}}]} | tojson }}</script>
+<script type="application/ld+json">{{ {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":cfg.site_name,"item":site_url ~ "/"},{"@type":"ListItem","position":2,"name":"주식 용어사전","item":site_url ~ "/glossary/"},{"@type":"ListItem","position":3,"name":t.term,"item":site_url ~ "/glossary/" ~ t.slug ~ "/"}]} | tojson }}</script>
+{% endblock %}
+{% block main %}
+<div class="wrap page narrow-wide">
+  <nav class="crumb" aria-label="현재 위치"><a href="{{ base }}/">홈</a> › <a href="{{ base }}/glossary/">주식 용어사전</a> › <span>{{ t.cat }}</span></nav>
+  <article class="card gl-card">
+    <p class="gl-cat">{{ t.cat }}</p>
+    <h1 class="gl-h1">{{ t.term }} <span>뜻</span></h1>
+    <p class="gl-short"><b>한 줄 요약</b>{{ t.short }}</p>
+    <p class="gl-body">{{ t.body }}</p>
+    {% if ex %}
+    <div class="gl-ex">
+      <p class="gl-ex-t"><span class="sprout" aria-hidden="true"></span>오늘의 실제 예시 · {{ ex.title }}</p>
+      {% for l in ex.lines %}<p>{{ l }}</p>{% endfor %}
+      {% if ex.rows %}
+      <ul class="gl-ex-list">{% for r in ex.rows %}<li><a href="{{ base }}/stock/{{ r.s.code }}/">{{ r.s.name }}</a><span class="{{ ud(r.s.chg) }}">{{ r.s.chg | pct }}</span><b>{{ r.v }}</b></li>{% endfor %}</ul>
+      {% elif ex.stock %}<p><a class="result-link" href="{{ base }}/stock/{{ ex.stock.code }}/">{{ ex.stock.name }} 쉬운 해설 보기 ›</a></p>{% endif %}
+      <p class="gl-ex-note">{{ base_date }} 장 마감 데이터로 자동 계산했어요. 예시일 뿐 매수·매도 추천이 아니에요.</p>
+    </div>
+    {% endif %}
+  </article>
+
+  {% if related %}
+  <section class="card">
+    <h2>'{{ t.cat }}' 다른 용어도 알아볼까요?</h2>
+    <ul class="gl-chips">{% for r in related %}<li><a href="{{ base }}/glossary/{{ r.slug }}/"><b>{{ r.term }}</b><span>{{ r.short }}</span></a></li>{% endfor %}</ul>
+    <p><a class="result-link" href="{{ base }}/glossary/">용어사전 전체 보기 ›</a></p>
+  </section>
+  {% endif %}
+
+  {{ hook_cards(base) }}
+</div>
+{% endblock %}

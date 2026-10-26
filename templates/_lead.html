@@ -1,0 +1,61 @@
+<style>
+.pro-hero{display:flex;flex-direction:column;gap:22px}
+.pro-badge{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;background:var(--hl);color:#1A1240;font-weight:800;font-size:16px;letter-spacing:-0.02em}
+.apply .pro-title{margin:0;font-size:clamp(44px,7vw,72px);line-height:1.08;font-weight:800;letter-spacing:-0.045em;color:#fff}
+.pro-title em{font-style:normal;background:linear-gradient(90deg,#A99BFF,#FF8FA3);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pro-sub{margin:0;font-size:18px;color:#C4CCD8;max-width:460px}
+.pro-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.pro-list li{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:600;color:#fff}
+.pro-list svg{flex:none;color:#3DDC97}
+.pro-free{display:flex;align-items:baseline;gap:10px;margin-top:4px;padding:16px 20px;border:1px solid var(--line-dark);border-radius:14px;background:var(--ink-2);max-width:420px}
+.pro-free b{font-size:34px;font-weight:800;color:#FFE14D;letter-spacing:-0.03em}
+.pro-free span{color:#C4CCD8;font-size:15px}
+/* 휴대폰 하단 바: 전화·카톡 대신 상담 버튼 하나만 */
+.mobile-bar{grid-template-columns:1fr !important}
+.mobile-bar [data-tel],.mobile-bar [data-kakao]{display:none !important}
+</style>
+<section id="apply" class="apply">
+  <div class="wrap apply-in">
+    <div class="apply-text pro-hero">
+      <span class="pro-badge">{{ cp.lead.badge }}</span>
+      <h2 class="pro-title">{{ cp.lead.title_1 }}<br><em>{{ cp.lead.title_2 }}</em></h2>
+      <p class="pro-sub">{{ cp.lead.sub }}</p>
+      <ul class="pro-list">
+        {% for pt in cp.lead.points %}<li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>{{ pt }}</li>{% endfor %}
+      </ul>
+      <div class="pro-free"><b>{{ cp.lead.free_big }}</b><span>{{ cp.lead.free_text }}</span></div>
+    </div>
+
+    <div class="form-card">
+      <form id="lead-form" class="main-form" data-lead="main" data-hook="{{ cp.lead.hook }}" novalidate>
+        <div class="row2">
+          <label class="field">휴대폰 번호
+            <input type="tel" name="phone" required autocomplete="tel" inputmode="numeric" placeholder="010-0000-0000" maxlength="13">
+          </label>
+          <label class="field"><span>이름 <small>(선택)</small></span>
+            <input type="text" name="name" autocomplete="name" placeholder="홍길동" maxlength="30">
+          </label>
+        </div>
+        <label class="field"><span>투자 경험 <small>(선택)</small></span>
+          <select name="exp"><option>1년 미만</option><option>1~3년</option><option>3~5년</option><option>5년 이상</option></select>
+        </label>
+        <label class="field"><span>상담받고 싶은 종목·내용 <small>(선택)</small></span>
+          <textarea name="msg" rows="3" maxlength="500" placeholder="예: 주식을 처음 시작하려는데 무엇부터 해야 할까요?"></textarea>
+        </label>
+        <div class="hp" aria-hidden="true"><label>홈페이지<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <div class="consent">
+          <label><input type="checkbox" name="agree_privacy" value="Y"><span><b>[필수]</b> 개인정보 수집·이용에 동의합니다</span></label>
+          <p class="detail">수집 항목: 휴대폰 번호(필수), 이름·투자 경험·문의 내용(선택) · 목적: 상담 연락 및 문의 응대 · 보유 기간: 수집일로부터 1년 또는 동의 철회 시까지. 동의를 거부할 수 있으나, 거부 시 상담 신청이 제한됩니다. <a href="{{ base }}/privacy/" target="_blank">개인정보처리방침</a></p>
+          <label><input type="checkbox" name="agree_marketing" value="Y"><span><b>[선택]</b> 문자·카카오톡으로 시장 정보 등 광고성 정보를 받는 데 동의합니다</span></label>
+        </div>
+        <p class="lead-error error" role="alert" hidden></p>
+        <button type="submit" class="btn btn-accent btn-lg">{{ cp.lead.button }}</button>
+      </form>
+      <div class="done lead-done" role="status" hidden>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1F7A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>
+        <h3>신청이 접수되었습니다</h3>
+        <p>남겨주신 번호로 곧 연락드릴게요.</p>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | {{ cfg.site_name }}{% endblock %}
+{% block desc %}매 거래일 장 마감 후 코스피·코스닥 실제 데이터로 자동 작성하는 증시 리포트. 시장 마감 요약, 상승률·하락률 순위, 거래량 급증, 52주 신고가, 업종별 관련주 동향.{% endblock %}
+{% block path %}{{ path }}{% endblock %}
+{% block main %}
+<div class="wrap page narrow-wide">
+  <nav class="crumb" aria-label="현재 위치"><a href="{{ base }}/">홈</a> › <a href="{{ base }}/report/">증시 리포트</a></nav>
+  <section class="card">
+    <h1 class="h1-sm">{{ heading }}</h1>
+    <p class="muted">매 거래일 장 마감 후 실제 시세 데이터로 자동 발행됩니다.</p>
+    {% for d, full, items in groups %}
+    <h2 class="post-h2"><a href="{{ base }}/report/{{ d }}/">{{ full }}</a> <span class="muted small-inline">{{ items | length }}개</span></h2>
+    <ul class="post-list">
+      {% for x in items %}<li><a href="{{ base }}/report/{{ x.date }}/{{ x.slug }}/">{{ x.title }}</a></li>{% endfor %}
+    </ul>
+    {% endfor %}
+  </section>
+  {% if dates | length > 1 %}
+  <section class="card">
+    <h2>날짜별 리포트</h2>
+    <ul class="chips">{% for d in dates %}<li><a href="{{ base }}/report/{{ d }}/">{{ d }}</a></li>{% endfor %}</ul>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

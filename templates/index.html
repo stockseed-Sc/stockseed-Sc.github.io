@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ud, hook_cards with context %}
+{% set d = bigcaps[0] %}
+{% block title %}{{ cp.home_title }}{% endblock %}
+{% block desc %}{{ cp.home_desc | replace("{count}", "{:,}".format(count)) }}{% endblock %}
+{% block path %}/{% endblock %}
+{% block body_attr %} data-stock="{{ d.name }} ({{ d.code }})"{% endblock %}
+{% block head %}
+<script type="application/ld+json">{{ {"@context":"https://schema.org","@type":"WebSite","name":cfg.site_name,"url":site_url ~ "/"} | tojson }}</script>
+{% endblock %}
+{% block main %}
+<section class="hero tool-hero">
+  <div class="wrap tool-wrap">
+    <p class="hero-badges center">{% for b in cp.hero_badges %}<span class="{{ "free-lg" if loop.first else "hero-chip" }}">{{ b }}</span>{% endfor %}<span class="hero-chip">전 종목 {{ "{:,}".format(count) }}개</span></p>
+    <h1 class="serif center">{{ cp.hero_title | safe }}</h1>
+    <p class="lead center">{{ cp.hero_sub | safe }}</p>
+
+    <form class="tool" data-tool role="search" action="{{ base }}/">
+      <label class="sr" for="tool-q">종목 검색</label>
+      <input id="tool-q" type="search" placeholder="종목명 또는 코드 (예: {{ d.name }}, {{ d.code }})" autocomplete="off">
+      <button type="submit" class="btn btn-accent btn-lg">{{ cp.tool_button }}</button>
+      <ul class="search-list" hidden></ul>
+    </form>
+
+    <div class="result" id="tool-result" aria-live="polite">
+      <div class="result-head">
+        <div>
+          <p class="result-name"><span data-r="name">{{ d.name }}</span> <span class="code" data-r="code">{{ d.code }}</span></p>
+          <p class="result-price"><b data-r="close">{{ d.close | price }}</b>원 <span data-r="chg" class="{{ ud(d.chg) }}">{{ d.chg | pct }}</span></p>
+        </div>
+        <span class="ai-badge lg">AI 기본 예측 · 5거래일</span>
+      </div>
+      <div class="result-grid">
+        <div class="ai-main">
+          <p class="ai-lbl">상승 확률</p>
+          <p class="ai-p {{ d.ai.cls }}" data-r="pbox"><span data-r="p">{% if d.ai.p is not none %}{{ '%.0f' | format(d.ai.p * 100) }}{% else %}-{% endif %}</span><small>%</small></p>
+          <p class="ai-signal {{ d.ai.cls }}" data-r="signal">{{ d.ai.signal or '데이터 부족' }}</p>
+          <div class="ai-meter" aria-hidden="true"><span data-r="meter" style="width: {{ '%.0f' | format((d.ai.p or 0.5) * 100) }}%"></span></div>
+        </div>
+        <div class="ai-range">
+          <p class="ai-lbl">예상 가격 범위</p>
+          <p class="ai-rng"><span class="down" data-r="lo">{{ d.ai.lo | price }}</span> ~ <span class="up" data-r="hi">{{ d.ai.hi | price }}</span>원</p>
+          <p class="ai-note">최근 변동성 기준 약 68% 확률 구간</p>
+          <a class="result-link" data-r="link" href="{{ base }}/stock/{{ d.code }}/">차트·시세 자세히 보기 ›</a>
+        </div>
+      </div>
+      <p class="ai-foot">{{ base_date }} 종가 기준 · 과거 데이터로 계산한 통계적 추정이며 미래 주가를 보장하지 않습니다.</p>
+    </div>
+  </div>
+</section>
+
+{% if today_term %}
+<section class="home-sec learn-sec">
+  <div class="wrap learn">
+    <div class="card today-term">
+      <p class="tt-badge"><span class="sprout" aria-hidden="true"></span>오늘의 용어</p>
+      <h2>{{ today_term.term }}</h2>
+      <p class="tt-short">{{ today_term.short }}</p>
+      <p class="tt-body">{{ today_term.body }}</p>
+      <p><a class="result-link" href="{{ base }}/glossary/{{ today_term.slug }}/">더 자세히 보기 ›</a> &nbsp; <a class="result-link" href="{{ base }}/glossary/">용어사전 전체 ›</a></p>
+    </div>
+    <div class="card checklist">
+      <h2>초보 체크리스트</h2>
+      <p class="muted">첫 투자 전에 하나씩 확인해 보세요.</p>
+      <ol>{% for txt, sl in checklist %}<li><span class="ck" aria-hidden="true"></span><span>{{ txt }}</span> <a href="{{ base }}/glossary/{{ sl }}/" aria-label="{{ txt }} 용어 설명">뜻 ›</a></li>{% endfor %}</ol>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% for sec in dz.home_sections %}
+{% if sec == "news" and top_news and ft.news %}
+<section class="news-sec home-sec">
+  <div class="wrap">
+    <div class="card news-card">
+      <div class="news-head">
+        <h2>{{ cp.news_title }}</h2>
+        <span class="muted small-inline">시가총액 상위 종목 · 매 거래일 갱신</span>
+      </div>
+      <ul class="news-list news-grid">
+        {% for n in top_news %}
+        <li>
+          <a href="{{ n.link }}" target="_blank" rel="nofollow noopener noreferrer"><span class="news-title">{{ n.title }}</span><span class="news-meta">{{ n.source }}{% if n.time %} · {{ n.time }}{% endif %}</span></a>
+          <a class="news-stock" href="{{ base }}/stock/{{ n.code }}/">{{ n.name }} 분석 보기 ›</a>
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="news-note">기사 제목과 링크만 제공하며, 기사 원문과 저작권은 각 언론사에 있습니다. (출처: Google 뉴스)</p>
+    </div>
+  </div>
+</section>
+{% elif sec == "hooks" %}
+<section class="hooks-sec home-sec">
+  <div class="wrap">
+    <h2 class="center serif hooks-title">{{ cp.hooks_title }}</h2>
+    {{ hook_cards(base) }}
+  </div>
+</section>
+{% elif sec == "reports" and today_posts and ft.reports %}
+<section class="reports-sec home-sec">
+  <div class="wrap">
+    <div class="card today-reports">
+      <h2>오늘의 증시 리포트 <span class="muted small-inline">{{ today_posts | length }}개 · 장 마감 후 자동 발행</span></h2>
+      <ul class="post-list">
+        {% for x in today_posts[:12] %}<li><a href="{{ base }}/report/{{ x.date }}/{{ x.slug }}/">{{ x.title }}</a></li>{% endfor %}
+      </ul>
+      <p><a class="result-link" href="{{ base }}/report/">증시 리포트 전체 보기 ›</a></p>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endfor %}
+<p class="center hooks-links wrap">{% if has_glossary %}<a href="{{ base }}/glossary/">주식 용어사전</a> · {% endif %}{% if ft.ai_page %}<a href="{{ base }}/ai/">AI 예측 방법·정확도</a> · {% endif %}<a href="{{ base }}/market/kospi/">코스피 전 종목</a> · <a href="{{ base }}/market/kosdaq/">코스닥 전 종목</a></p>
+{% endblock %}

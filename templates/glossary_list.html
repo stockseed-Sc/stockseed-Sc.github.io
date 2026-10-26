@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}주식 용어사전 {{ n }}개 — 초보도 이해하는 쉬운 설명 | {{ cfg.site_name }}{% endblock %}
+{% block desc %}PER, 시가총액, 상한가, 이동평균선, 배당락까지. 주식 초보가 꼭 알아야 할 용어 {{ n }}개를 쉬운 말로 풀었어요. 일부 용어는 오늘 실제 시장 숫자로 예시를 보여드려요.{% endblock %}
+{% block path %}/glossary/{% endblock %}
+{% block main %}
+<section class="hero hero-sm">
+  <div class="wrap">
+    <p class="hero-badges"><span class="free-lg">무료</span><span class="hero-chip">용어 {{ n }}개</span><span class="hero-chip">쉬운 말 풀이</span></p>
+    <h1>주식 용어사전</h1>
+    <p class="lead">모르는 말이 나오면 여기서 찾아보세요. 어려운 말은 하나도 없게 풀어 드려요.</p>
+    <div class="gl-search"><label class="sr" for="gl-q">용어 찾기</label><input id="gl-q" type="search" placeholder="예: PER, 상한가, 배당" autocomplete="off"></div>
+  </div>
+</section>
+<div class="wrap page">
+  {% for c, items in groups %}{% if items %}
+  <section class="card gl-group">
+    <h2>{{ c }} <span class="muted small-inline">{{ items | length }}개</span></h2>
+    <ul class="gl-chips">{% for t in items %}<li data-q="{{ (t.term ~ ' ' ~ t.short) | lower }}"><a href="{{ base }}/glossary/{{ t.slug }}/"><b>{{ t.term }}</b><span>{{ t.short }}</span></a></li>{% endfor %}</ul>
+  </section>
+  {% endif %}{% endfor %}
+  <p class="muted gl-none" hidden>찾는 용어가 없어요. 다른 말로 검색해 보세요.</p>
+</div>
+<script>
+(function(){var q=document.getElementById('gl-q');if(!q)return;q.addEventListener('input',function(){var v=q.value.trim().toLowerCase(),any=false;
+document.querySelectorAll('.gl-group').forEach(function(g){var vis=0;g.querySelectorAll('li[data-q]').forEach(function(li){var ok=!v||li.dataset.q.indexOf(v)>-1;li.hidden=!ok;if(ok)vis++;});g.hidden=!vis;if(vis)any=true;});
+document.querySelector('.gl-none').hidden=any;});})();
+</script>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ud, quick_form, hook_cards with context %}
+{% block title %}{{ s.name }} 주가 쉽게 보기 ({{ s.code }}) — 오늘 시세·흐름 쉬운 해설 | {{ cfg.site_name }}{% endblock %}
+{% block desc %}{{ s.name }}({{ s.code }}) AI 주가예측 무료{% if s.comment %} — {{ s.comment.head }}{% endif %}.{% if s.ai.p is not none %} 5거래일 뒤 상승 확률 {{ '%.0f' | format(s.ai.p * 100) }}%({{ s.ai.signal }}), 예상 범위 {{ s.ai.lo | price }}~{{ s.ai.hi | price }}원.{% endif %} {{ s.date_kr }} 종가 {{ s.close | price }}원({{ s.chg | pct }}), 시가총액 {{ s.marcap | won }}. 매일 장 마감 후 갱신.{% endblock %}
+{% block path %}/stock/{{ s.code }}/{% endblock %}
+{% block body_attr %} data-stock="{{ s.name }} ({{ s.code }})"{% endblock %}
+{% block head %}
+<script type="application/ld+json">
+{{ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": cfg.site_name, "item": site_url ~ "/"},
+    {"@type": "ListItem", "position": 2, "name": ("코스피" if s.market == "KOSPI" else "코스닥"), "item": site_url ~ "/market/" ~ (s.market | lower) ~ "/"},
+    {"@type": "ListItem", "position": 3, "name": s.name ~ " 주가", "item": site_url ~ "/stock/" ~ s.code ~ "/"}
+  ]
+} | tojson }}
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{% for q, a in faqs %}{"@type":"Question","name":{{ q | tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ a | tojson }}}}{% if not loop.last %},{% endif %}{% endfor %}]}</script>
+{% endblock %}
+
+{% block sheet %}{% if ft.popup %}
+<div class="sheet" id="lead-sheet" role="dialog" aria-label="무료 상담 신청" hidden>
+  <div class="wrap sheet-in">
+    <button type="button" class="sheet-close" data-close-sheet aria-label="닫기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    {{ quick_form("popup", cp.popup_title | replace("{stock}", s.name), cp.popup_sub, "무료 상담 받기", base, dark=True) }}
+  </div>
+</div>
+{% endif %}{% endblock %}
+
+{% block main %}
+<div class="wrap page">
+  <nav class="crumb" aria-label="현재 위치">
+    <a href="{{ base }}/">홈</a> ›
+    <a href="{{ base }}/market/{{ s.market | lower }}/">{{ "코스피" if s.market == "KOSPI" else "코스닥" }}</a>
+    {% if sector_slug %} › <a href="{{ base }}/sector/{{ sector_slug }}/">{{ s.sector }}</a>{% endif %}
+    › <span>{{ s.name }}</span>
+  </nav>
+
+  <section class="quote card">
+    <div class="quote-head">
+      <h1>{{ s.name }} 주가 <span class="code-lg">{{ s.code }}</span></h1>
+      <p class="tags"><span class="tag">{{ "코스피" if s.market == "KOSPI" else "코스닥" }}</span>{% if s.sector %}<span class="tag">{{ s.sector }}</span>{% endif %}<span class="tag">시가총액 {{ rank }}위</span></p>
+    </div>
+    <div class="price-row">
+      <p class="price {{ ud(s.chg) }}">{{ s.close | price }}<small>원</small></p>
+      <p class="change {{ ud(s.chg) }}">{% if s.change > 0 %}▲{% elif s.change < 0 %}▼{% endif %} {{ (s.change | abs) | price }} ({{ s.chg | pct }})</p>
+      <p class="asof">{{ s.date }} 종가 기준</p>
+    </div>
+    {% if guide %}
+    <details class="nguide" open>
+      <summary><span class="sprout" aria-hidden="true"></span>이 숫자는 무슨 뜻일까요?</summary>
+      <dl>{% for g in guide %}<div><dt>{{ g.label }}</dt><dd><b>{{ g.value }}</b><span>{{ g.desc }}{% if g.slug %} <a href="{{ base }}/glossary/{{ g.slug }}/">용어 설명 ›</a>{% endif %}</span></dd></div>{% endfor %}</dl>
+    </details>
+    {% endif %}
+    {% set ai = s.ai %}
+    <div class="ai-box">
+      <div class="ai-top">
+        <p class="ai-title"><span class="ai-badge">AI 주가예측</span><span class="free">무료</span></p>
+        <a class="ai-how" href="{{ base }}/ai/">예측 방법·정확도 보기 ›</a>
+      </div>
+      {% if ai.p is not none %}
+      <div class="ai-grid">
+        <div class="ai-main">
+          <p class="ai-lbl">5거래일 뒤 상승 확률</p>
+          <p class="ai-p {{ ai.cls }}">{{ '%.0f' | format(ai.p * 100) }}<small>%</small></p>
+          <p class="ai-signal {{ ai.cls }}">{{ ai.signal }}</p>
+          <div class="ai-meter" aria-hidden="true"><span style="width: {{ '%.0f' | format(ai.p * 100) }}%"></span></div>
+        </div>
+        <div class="ai-range">
+          <p class="ai-lbl">5거래일 예상 가격 범위</p>
+          <p class="ai-rng"><span class="down">{{ ai.lo | price }}</span> ~ <span class="up">{{ ai.hi | price }}</span>원</p>
+          <p class="ai-note">최근 20일 변동성 기준 ±{{ '%.1f' | format(ai.band) }}% · 약 68% 확률 구간</p>
+        </div>
+      </div>
+      {% else %}
+      <p class="ai-note">상장 기간이 짧거나 데이터가 부족해 이 종목은 AI 예측을 계산하지 않았습니다. 예상 가격 범위: {{ ai.lo | price }} ~ {{ ai.hi | price }}원</p>
+      {% endif %}
+      <p class="ai-foot">{{ s.date }} 종가까지 학습한 머신러닝 모델의 통계적 추정이며, 미래 주가를 보장하지 않습니다.</p>
+    </div>
+    {% if s.comment %}
+    <div class="cmt">
+      <div class="cmt-top">
+        <span class="ai-badge">{{ cp.comment_label }}</span>
+        <span class="cmt-date">{{ s.date }} 장 마감 데이터 기준</span>
+      </div>
+      <p class="cmt-head">"{{ s.comment.head }}"</p>
+      <dl class="cmt-list">
+        {% for k, v in s.comment.points %}<div><dt>{{ k }}</dt><dd>{{ v }}</dd></div>{% endfor %}
+      </dl>
+      {% if s.comment.watch %}
+      <div class="cmt-watch"><b>체크포인트</b><ul>{% for w in s.comment.watch %}<li>{{ w }}</li>{% endfor %}</ul></div>
+      {% endif %}
+      <p class="cmt-foot">{{ cfg.site_name }} 분석 엔진이 시세·거래량·기술지표를 바탕으로 자동 작성한 코멘트로, 투자 권유가 아닙니다.</p>
+    </div>
+    {% endif %}
+    {{ hook_cards(base, s.name) }}
+    <div class="chart-box">
+      {{ s.chart | safe }}
+      <p class="chart-cap">최근 120거래일 일봉 · 아래는 거래량 <span class="lg up">■ 상승</span> <span class="lg down">■ 하락</span></p>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>오늘의 시세</h2>
+      <dl class="stats">
+        <div><dt>시가</dt><dd>{{ s.open | price }}</dd></div>
+        <div><dt>고가</dt><dd class="up">{{ s.high | price }}</dd></div>
+        <div><dt>저가</dt><dd class="down">{{ s.low | price }}</dd></div>
+        <div><dt>전일 종가</dt><dd>{{ s.prev | price }}</dd></div>
+        <div><dt>거래량</dt><dd>{{ "{:,}".format(s.volume) }}주</dd></div>
+        <div><dt>거래대금</dt><dd>{{ s.amount | won }}</dd></div>
+        <div><dt>시가총액</dt><dd>{{ s.marcap | won }}</dd></div>
+        <div><dt>상장주식수</dt><dd>{% if s.shares %}{{ "{:,.0f}".format(s.shares) }}주{% else %}-{% endif %}</dd></div>
+        <div><dt>52주 최고</dt><dd>{{ s.hi52 | price }}</dd></div>
+        <div><dt>52주 최저</dt><dd>{{ s.lo52 | price }}</dd></div>
+      </dl>
+    </section>
+    <section class="card">
+      <h2>기간별 수익률</h2>
+      <dl class="stats returns">
+        <div><dt>1주</dt><dd class="{{ ud(s.r1w) }}">{{ s.r1w | pct }}</dd></div>
+        <div><dt>1개월</dt><dd class="{{ ud(s.r1m) }}">{{ s.r1m | pct }}</dd></div>
+        <div><dt>3개월</dt><dd class="{{ ud(s.r3m) }}">{{ s.r3m | pct }}</dd></div>
+        <div><dt>6개월</dt><dd class="{{ ud(s.r6m) }}">{{ s.r6m | pct }}</dd></div>
+        <div><dt>1년</dt><dd class="{{ ud(s.r1y) }}">{{ s.r1y | pct }}</dd></div>
+        <div><dt>52주 고점 대비</dt><dd class="{{ ud(s.from_hi) }}">{{ s.from_hi | pct }}</dd></div>
+      </dl>
+      <div class="range" aria-label="52주 가격 범위에서 현재 위치">
+        {% set pos = ((s.close - s.lo52) / ((s.hi52 - s.lo52) or 1) * 100) %}
+        <div class="range-bar"><span style="left: {{ '%.1f' | format([0, [100, pos] | min] | max) }}%"></span></div>
+        <div class="range-lbl"><span>52주 최저 {{ s.lo52 | price }}</span><span>52주 최고 {{ s.hi52 | price }}</span></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>{{ s.name }} 주가 요약</h2>
+    {% for line in summary %}<p class="sum">{{ line }}</p>{% endfor %}
+    <div class="cta-inline">
+      <p><b>{{ s.name }}</b> AI 분석 결과, 어떻게 활용해야 할지 무료로 자세히 설명해 드립니다.</p>
+      <a class="btn btn-accent" href="#apply">무료 상담 신청</a>
+    </div>
+  </section>
+
+  {% if s.news and ft.news %}
+  <section class="card">
+    <h2>{{ s.name }} 최신 뉴스</h2>
+    <ul class="news-list">
+      {% for n in s.news %}
+      <li><a href="{{ n.link }}" target="_blank" rel="nofollow noopener noreferrer"><span class="news-title">{{ n.title }}</span><span class="news-meta">{{ n.source }}{% if n.time %} · {{ n.time }}{% endif %}</span></a></li>
+      {% endfor %}
+    </ul>
+    <p class="news-note">기사 제목과 링크만 제공하며, 기사 원문과 저작권은 각 언론사에 있습니다. (출처: Google 뉴스)</p>
+  </section>
+  {% endif %}
+
+  <section class="card">
+    <h2>최근 10거래일 시세</h2>
+    <div class="table-box">
+      <table class="tbl">
+        <thead><tr><th>일자</th><th class="num">종가</th><th class="num">등락률</th><th class="num">거래량</th></tr></thead>
+        <tbody>
+        {% for r in s.recent %}
+          <tr><td>{{ r.date }}</td><td class="num">{{ r.close | price }}</td><td class="num {{ ud(r.chg) }}">{{ r.chg | pct }}</td><td class="num">{{ "{:,}".format(r.volume) }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>자주 묻는 질문</h2>
+    {% for q, a in faqs %}
+    <details class="faq"{% if loop.first %} open{% endif %}><summary>{{ q }}</summary><p>{{ a }}</p></details>
+    {% endfor %}
+  </section>
+
+  {% if peers %}
+  <section class="card">
+    <h2>{% if s.sector %}{{ s.sector }} 관련 종목{% else %}함께 많이 보는 종목{% endif %}</h2>
+    <ul class="peers">
+      {% for p in peers %}
+      <li><a href="{{ base }}/stock/{{ p.code }}/"><span class="pname">{{ p.name }}</span><span class="pval">{{ p.close | price }}</span><span class="pchg {{ ud(p.chg) }}">{{ p.chg | pct }}</span></a></li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

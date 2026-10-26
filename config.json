@@ -1,0 +1,118 @@
+{
+  "_설명": "이 파일만 고치면 사이트가 바뀝니다. theme(색), copy(문구), features(기능)는 비워두면 기본값을 씁니다. 컨셉별 예시는 키트의 concepts 폴더를 참고하세요.",
+  "site_name": "주식새싹",
+  "site_url": "https://stockseed-sc.github.io",
+  "base_path": "",
+  "_sheet_url_설명": "★ 모든 사이트 공통 접수 시트 주소. 바꾸지 마세요 (모든 신청이 한 시트로 모입니다)",
+  "sheet_url": "https://script.google.com/macros/s/AKfycbyFVUspFhkWK2NVH2eMm90bs9zhJxEoFB5FVcIB7O-T9f6VvPwl7MvpZwO6SN8GHTjjBA/exec",
+  "kakao_url": "",
+  "phone": "",
+  "phone_hours": "평일 09:00–18:00",
+  "reply_days": "1",
+  "biz_info": "상호 [상호명] · 대표 [대표자명] · 주소 [사업장 주소]",
+  "privacy_owner": "[상호명]",
+  "privacy_officer": "성명: [성명] · 직책: [직책] · 연락처: [전화번호] · 이메일: [이메일]",
+  "privacy_effective_date": "[YYYY년 MM월 DD일]",
+  "hosting_company": "GitHub, Inc.",
+  "google_site_verification": "",
+  "naver_site_verification": "",
+  "markets": [
+    "KOSPI",
+    "KOSDAQ"
+  ],
+  "min_marcap": 0,
+  "exclude_name_regex": "스팩|리츠$",
+  "history_days": 550,
+  "workers": 8,
+  "news_top_n": 300,
+  "theme": {
+    "ink": "#26301E",
+    "ink2": "#34402A",
+    "bg": "#FAF7EF",
+    "accent": "#2F9E44",
+    "ai": "#F08C00",
+    "highlight": "#FFD43B",
+    "up": "#E03131",
+    "down": "#1C7ED6"
+  },
+  "copy": {
+    "home_title": "{site} | 주식 초보를 위한 쉬운 종목 해설·주식 용어사전",
+    "home_desc": "어려운 차트 대신 쉬운 말로. 코스피·코스닥 {count}개 종목의 오늘 흐름을 초보자 눈높이로 풀고, 주식 용어 100여 개를 쉽게 설명해요. 무료.",
+    "promo": "주식 처음이세요? 종목 해설·용어사전 <b>무료</b>",
+    "nav_ai": "AI 계산 방법",
+    "news_title": "오늘 많이 나온 종목 뉴스",
+    "hero_badges": [
+      "무료",
+      "초보 환영"
+    ],
+    "hero_title": "주식, 어렵지 않게.<br>쉬운 말로 풀어 드려요.",
+    "hero_sub": "궁금한 종목 이름만 넣어 보세요. 지금 흐름과 숫자의 뜻을 차근차근 알려 드려요.",
+    "tool_button": "쉽게 알아보기",
+    "hooks_title": "혼자 공부하기 막막하다면",
+    "hooks": [
+      {
+        "style": "ai",
+        "tag": "1:1 쉬운 해설",
+        "title": "이 종목, 쉽게 설명해 드릴게요",
+        "title_nostock": "관심 종목, 쉽게 설명해 드릴게요",
+        "bullets": [
+          "지금 흐름을 쉬운 말로",
+          "꼭 봐야 할 숫자 3가지",
+          "초보가 자주 하는 실수"
+        ],
+        "button": "무료 해설 신청",
+        "hook": "1:1 쉬운 해설",
+        "sub": "번호를 남기시면 연락드려 차근차근 설명해 드려요."
+      },
+      {
+        "style": "pro",
+        "tag": "주식 입문 상담",
+        "title": "처음이라면 상담부터 받아보세요",
+        "title_nostock": "주식 처음이세요? 상담부터 받아보세요",
+        "bullets": [
+          "계좌 만들기부터 첫 주문까지",
+          "투자금·목표 정하는 법",
+          "상담 비용 없음"
+        ],
+        "button": "입문 상담 신청",
+        "hook": "주식 입문 상담",
+        "sub": "번호를 남기시면 영업일 기준 1일 안에 연락드려요."
+      }
+    ],
+    "lead": {
+      "badge": "초보 환영 · 상담 0원",
+      "title_1": "주식 첫걸음,",
+      "title_2": "같이 시작해요",
+      "sub": "휴대폰 번호만 남기시면 영업일 기준 {reply_days}일 안에 연락드려요.",
+      "points": [
+        "계좌 만들기·첫 주문 안내",
+        "투자금·목표 계획 세우기",
+        "초보가 피해야 할 실수"
+      ],
+      "free_big": "0원",
+      "free_text": "부담 없이 번호만 남기세요",
+      "button": "입문 무료 상담 신청",
+      "hook": "주식 입문 상담"
+    },
+    "popup_title": "{stock}, 아직 어렵게 느껴지시나요?",
+    "popup_sub": "이 종목의 흐름과 숫자를 쉽게 설명해 드려요. 번호만 남겨주세요.",
+    "comment_label": "AI 쉬운 해설"
+  },
+  "features": {
+    "news": true,
+    "reports": true,
+    "comment": true,
+    "popup": true,
+    "ai_page": true
+  },
+  "design": {
+    "preset": "soft",
+    "home_sections": [
+      "hooks",
+      "reports",
+      "news"
+    ]
+  },
+  "_design_설명": "preset: soft(주식새싹 전용으로 수정됨). home_sections: news, hooks, reports 중 원하는 순서로",
+  "_site_url_설명": "★ GitHub 아이디가 생기면 [깃허브아이디] 부분만 바꾸세요. 예: https://abc.github.io"
+}

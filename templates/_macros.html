@@ -1,0 +1,76 @@
+{% macro ud(v) -%}{% if v is none %}{% elif v > 0 %}up{% elif v < 0 %}down{% endif %}{%- endmacro %}
+
+{% macro stock_table(items, base, show_rank=True) -%}
+<div class="table-box">
+<table class="tbl">
+  <thead><tr>{% if show_rank %}<th class="num hide-sm">순위</th>{% endif %}<th>종목</th><th class="num">종가</th><th class="num">등락률</th><th class="num hide-sm">거래대금</th><th class="num hide-sm">시가총액</th></tr></thead>
+  <tbody>
+  {% for x in items %}
+  <tr>
+    {% if show_rank %}<td class="num muted hide-sm">{{ loop.index }}</td>{% endif %}
+    <td><a class="sname" href="{{ base }}/stock/{{ x.code }}/">{{ x.name }}</a><span class="code">{{ x.code }}</span></td>
+    <td class="num">{{ x.close | price }}</td>
+    <td class="num {{ ud(x.chg) }}">{{ x.chg | pct }}</td>
+    <td class="num hide-sm">{{ x.amount | won }}</td>
+    <td class="num hide-sm">{{ x.marcap | won }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{%- endmacro %}
+
+
+{% macro ai_table(items, base) -%}
+<div class="table-box">
+<table class="tbl">
+  <thead><tr><th>종목</th><th class="num">종가</th><th class="num">오늘</th><th class="num">AI 상승확률</th><th class="num hide-sm">예상 범위(5일)</th></tr></thead>
+  <tbody>
+  {% for x in items %}
+  <tr>
+    <td><a class="sname" href="{{ base }}/stock/{{ x.code }}/">{{ x.name }}</a><span class="code">{{ x.code }}</span></td>
+    <td class="num">{{ x.close | price }}</td>
+    <td class="num {{ ud(x.chg) }}">{{ x.chg | pct }}</td>
+    <td class="num"><b class="{{ x.ai.cls }}">{{ '%.0f' | format(x.ai.p * 100) }}%</b></td>
+    <td class="num hide-sm muted">{{ x.ai.lo | price }}~{{ x.ai.hi | price }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{%- endmacro %}
+
+
+{% macro quick_form(source, title, sub, button, base, dark=False) -%}
+<div class="quick{% if dark %} quick-dark{% endif %}">
+  <form class="quick-form" data-lead="{{ source }}" novalidate>
+    <p class="quick-title">{{ title }}</p>
+    {% if sub %}<p class="quick-sub">{{ sub }}</p>{% endif %}
+    <div class="quick-row">
+      <label class="sr" for="ph-{{ source }}">휴대폰 번호</label>
+      <input id="ph-{{ source }}" type="tel" name="phone" inputmode="numeric" autocomplete="tel" placeholder="010-0000-0000" maxlength="13" required>
+      <button type="submit" class="btn btn-accent">{{ button }}</button>
+    </div>
+    <label class="quick-consent"><input type="checkbox" name="agree_privacy" value="Y"><span>[필수] 개인정보 수집·이용 동의 <small>(휴대폰 번호·보던 종목 / 상담 연락 목적 / 1년 보관 · <a href="{{ base }}/privacy/" target="_blank">자세히</a>)</small></span></label>
+    <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+    <p class="lead-error" role="alert" hidden></p>
+  </form>
+  <p class="lead-done" role="status" hidden>접수됐습니다. 남겨주신 번호로 곧 연락드리겠습니다.</p>
+</div>
+{%- endmacro %}
+
+
+{% macro hook_cards(base, stock=None) -%}
+<div class="hooks">
+  {% for h in cp.hooks %}
+  <div class="hook hook-{{ h.style or 'ai' }}">
+    <p class="hook-tag">{{ h.tag }} <span class="free">무료</span></p>
+    <h3>{% if stock %}{{ stock }}, {{ h.title }}{% else %}{{ h.title_nostock or h.title }}{% endif %}</h3>
+    <ul class="hook-list">{% for b in h.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
+    <button type="button" class="btn {{ 'btn-ai' if h.style == 'ai' else 'btn-accent' }} btn-lg" data-hook="{{ h.hook }}"
+      data-hook-title="{% if stock %}{{ stock }} {% endif %}{{ h.hook }} 무료 신청"
+      data-hook-sub="{{ h.sub }}">{{ h.button }}</button>
+  </div>
+  {% endfor %}
+</div>
+{%- endmacro %}

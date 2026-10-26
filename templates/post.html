@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ud, hook_cards with context %}
+{% block title %}{{ p.title }} | {{ cfg.site_name }}{% endblock %}
+{% block desc %}{{ p.desc }}{% endblock %}
+{% block path %}/report/{{ p.date }}/{{ p.slug }}/{% endblock %}
+{% block head %}
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org", "@type": "Article",
+  "headline": p.title, "description": p.desc,
+  "datePublished": p.date ~ "T16:40:00+09:00", "dateModified": p.date ~ "T16:40:00+09:00",
+  "author": {"@type": "Organization", "name": cfg.site_name},
+  "publisher": {"@type": "Organization", "name": cfg.site_name},
+  "mainEntityOfPage": site_url ~ "/report/" ~ p.date ~ "/" ~ p.slug ~ "/",
+  "keywords": p.tags | join(", ")
+} | tojson }}</script>
+{% endblock %}
+{% block main %}
+<div class="wrap page narrow-wide">
+  <nav class="crumb" aria-label="현재 위치"><a href="{{ base }}/">홈</a> › <a href="{{ base }}/report/">증시 리포트</a> › <a href="{{ base }}/report/{{ p.date }}/">{{ date_full }}</a></nav>
+  <article class="card post">
+    <p class="post-meta"><span class="ai-badge">자동 리포트</span> {{ date_full }} 장 마감 기준</p>
+    <h1 class="post-title">{{ p.title }}</h1>
+    {% for line in p.intro %}<p class="sum">{{ line }}</p>{% endfor %}
+    {% for t in p.tables %}
+    <h2 class="post-h2">{{ t.title }}</h2>
+    <div class="table-box">
+      <table class="tbl">
+        <thead><tr><th class="num hide-sm">순위</th><th>종목</th><th class="num">종가</th><th class="num">등락률</th><th class="num">{{ t.extra }}</th></tr></thead>
+        <tbody>
+        {% for r in t.rows %}
+          <tr>
+            <td class="num muted hide-sm">{{ loop.index }}</td>
+            <td><a class="sname" href="{{ base }}/stock/{{ r.code }}/">{{ r.name }}</a><span class="code">{{ r.code }}</span></td>
+            <td class="num">{{ r.close | price }}</td>
+            <td class="num {{ ud(r.chg) }}">{{ r.chg | pct }}</td>
+            <td class="num">{{ r.extra }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+    <p class="tags">{% for t in p.tags %}<span class="tag">#{{ t }}</span>{% endfor %}</p>
+    <p class="disclaim">이 글은 {{ date_full }} 장 마감 데이터로 자동 작성되었습니다. 특정 종목의 매수·매도를 권유하지 않으며, 투자 판단의 책임은 투자자 본인에게 있습니다.</p>
+  </article>
+
+  {{ hook_cards(base) }}
+
+  {% if related %}
+  <section class="card" style="margin-top:20px">
+    <h2>같은 날 다른 리포트</h2>
+    <ul class="post-list">
+      {% for x in related %}<li><a href="{{ base }}/report/{{ x.date }}/{{ x.slug }}/">{{ x.title }}</a></li>{% endfor %}
+    </ul>
+    <p><a class="result-link" href="{{ base }}/report/{{ p.date }}/">{{ date_full }} 리포트 전체 보기 ›</a></p>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

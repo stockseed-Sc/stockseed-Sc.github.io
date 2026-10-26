@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stock_table %}
+{% block title %}{{ title }} ({{ base_date }}) | {{ cfg.site_name }}{% endblock %}
+{% block desc %}{{ desc }}{% endblock %}
+{% block path %}{{ path }}{% endblock %}
+{% block main %}
+<div class="wrap page">
+  <nav class="crumb" aria-label="현재 위치"><a href="{{ base }}/">홈</a> › <span>{{ heading }}</span></nav>
+  <section class="card">
+    <h1 class="h1-sm">{{ heading }} <span class="muted">{{ items | length }}종목</span></h1>
+    <p class="muted">{{ base_date }} 종가 기준 · 시가총액 순 · 종목명을 누르면 상세 페이지로 이동합니다.</p>
+    {{ stock_table(items, base) }}
+  </section>
+</div>
+{% endblock %}
